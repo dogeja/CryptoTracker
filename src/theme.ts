@@ -5,6 +5,7 @@ import { DefaultTheme } from "styled-components";
 
 export const Theme: DefaultTheme = {
   textColor: "#192a56",
-  bgColor: "#7f8fa6",
+  bgColor: "#353b48",
   accentColor: "#e1b12c",
+  ListColor: "white",
 };
