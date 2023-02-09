@@ -6,9 +6,6 @@ const Router = () => {
   return (
     <BrowserRouter>
       <Switch>
-        <Route path="/:coinId/:Price">
-          <Price />
-        </Route>
         <Route path="/:coinId">
           <Coin />
         </Route>

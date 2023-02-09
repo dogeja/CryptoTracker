@@ -24,6 +24,7 @@ const Header = styled.header`
     width: 80px;
     height: 80px;
     transition: 4s ease-in 0.4s;
+    margin: 0;
   }
   &:hover {
     img {
@@ -92,7 +93,7 @@ const Coins = () => {
       setLoading(false);
     })();
   }, []);
-  console.log(coins);
+
   return (
     <Container>
       <Header>
