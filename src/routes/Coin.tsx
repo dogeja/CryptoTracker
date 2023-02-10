@@ -36,9 +36,6 @@ const Title = styled.h1`
     right: 0;
     font-size: 1.8rem;
   }
-  &:hover {
-    color: ${(props) => props.theme.ListColor};
-  }
 `;
 const Img = styled.img`
   width: 40px;
@@ -56,12 +53,6 @@ const Header = styled.header`
   justify-content: center;
   align-items: center;
   user-select: none;
-
-  &:hover {
-    img {
-      transform: rotate(720deg);
-    }
-  }
 `;
 const Tabs = styled.div`
   display: flex;
@@ -108,6 +99,21 @@ const OverviewItem = styled.div`
     font-weight: 400;
     text-transform: uppercase;
     margin-bottom: 5px;
+  }
+`;
+const PrevBtn = styled.div`
+  font-family: "NanumSquareNeo-Variable";
+  font-weight: 900;
+  font-size: 2rem;
+  position: absolute;
+  left: 42px;
+  line-height: 42px;
+  width: 42px;
+  height: 42px;
+  color: ${(props) => props.theme.ListColor};
+  transition: 0.4s;
+  &:hover {
+    color: ${(props) => props.theme.accentColor};
   }
 `;
 const Description = styled.div`
@@ -244,6 +250,9 @@ const Coin = () => {
   return (
     <Container>
       <Header>
+        <PrevBtn>
+          <Link to={`/`}>&larr;</Link>
+        </PrevBtn>
         {loading ? (
           <Img2 src="https://media1.giphy.com/media/SixRnKkqPYhRgSJ4Vj/giphy.gif?cid=6c09b952bpwm1m4w6idkb3gry3pr3sww8svfsky6x9xg1nor&rid=giphy.gif&ct=s"></Img2>
         ) : (
@@ -255,11 +264,11 @@ const Coin = () => {
         {loading ? (
           <Title>로딩중...</Title>
         ) : (
-          <Title>
-            <Link to={`/`}>
+          <>
+            <Title>
               {state?.name ? state.name : loading ? "로딩중..." : info?.name}
-            </Link>
-          </Title>
+            </Title>
+          </>
           //state는 useLocation()을 이용한
           //user Location의 정보를 담은 객체.
           /* 

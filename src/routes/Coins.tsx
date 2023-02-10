@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { fetchCoins } from "../api";
+import { useQuery } from "react-query";
 const Title = styled.h1`
   color: ${(props) => props.theme.accentColor};
   font-size: 1.8rem;
@@ -72,7 +73,7 @@ const Img = styled.img`
   margin-right: 0.5rem;
 `;
 
-interface CoinInterface {
+interface ICoin {
   id: string;
   name: string;
   symbol: string;
@@ -83,26 +84,16 @@ interface CoinInterface {
 }
 
 const Coins = () => {
-  const [loading, setLoading] = useState(true);
-  const [coins, setCoins] = useState<CoinInterface[]>([]);
-  useEffect(() => {
-    (async () => {
-      const response = await fetch("https://api.coinpaprika.com/v1/coins");
-      const json = await response.json();
-      setCoins(json.slice(0, 100));
-      setLoading(false);
-    })();
-  }, []);
-
+  const { isLoading, data } = useQuery<ICoin[]>("allCoins", fetchCoins);
   return (
     <Container>
       <Header>
         <Img src="https://media1.giphy.com/media/SixRnKkqPYhRgSJ4Vj/giphy.gif?cid=6c09b952bpwm1m4w6idkb3gry3pr3sww8svfsky6x9xg1nor&rid=giphy.gif&ct=s"></Img>
-        {loading ? <Title>로딩중...</Title> : <Title>!비트코인!</Title>}
+        {isLoading ? <Title>로딩중...</Title> : <Title>!비트코인!</Title>}
         <Img src="https://media1.giphy.com/media/SixRnKkqPYhRgSJ4Vj/giphy.gif?cid=6c09b952bpwm1m4w6idkb3gry3pr3sww8svfsky6x9xg1nor&rid=giphy.gif&ct=s"></Img>
       </Header>
       <CoinsList>
-        {coins.map((coin) => (
+        {data?.map((coin) => (
           <Coin key={coin.id}>
             <Link
               to={{
