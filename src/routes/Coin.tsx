@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Switch, Route, useLocation, useParams } from "react-router";
+import {
+  Switch,
+  Route,
+  useLocation,
+  useParams,
+  useRouteMatch,
+} from "react-router";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import Price from "./Price";
 import Chart from "./Chart";
@@ -20,6 +27,7 @@ const Title = styled.h1`
   font-family: "NanumSquareNeo-Variable";
   font-weight: 900;
   display: flex;
+  transition: 0.4s ease-in-out;
   span {
     align-items: center;
     position: relative;
@@ -27,6 +35,9 @@ const Title = styled.h1`
     left: 0;
     right: 0;
     font-size: 1.8rem;
+  }
+  &:hover {
+    color: ${(props) => props.theme.ListColor};
   }
 `;
 const Img = styled.img`
@@ -52,6 +63,30 @@ const Header = styled.header`
     }
   }
 `;
+const Tabs = styled.div`
+  display: flex;
+  margin: 25px 0px;
+  justify-content: space-around;
+`;
+
+const Tab = styled.span<{ isActive: boolean }>`
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 400;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  width: 40vw;
+  transition: 0.2s ease-in-out;
+  color: ${(props) => (props.isActive ? props.theme.accentColor : null)};
+  &:hover {
+    background-color: rgba(51, 38, 51, 0.3);
+  }
+  a {
+    padding: 14px 0px;
+    display: block;
+  }
+`;
 const Article = styled.div`
   color: ${(props) => props.theme.ListColor};
 `;
@@ -62,6 +97,7 @@ const Overview = styled.div`
   padding: 10px 20px;
   border-radius: 10px;
   margin-bottom: 0.4rem;
+  font-family: "Montserrat";
 `;
 const OverviewItem = styled.div`
   display: flex;
@@ -74,19 +110,24 @@ const OverviewItem = styled.div`
     margin-bottom: 5px;
   }
 `;
-const Description = styled.p`
+const Description = styled.div`
   color: ${(props) => props.theme.accentColor};
-  display: block;
   margin: 0 auto;
   margin: 20px 0px;
   line-height: 0.8rem;
   height: 400px;
-  font-family: "NanumSquareNeo-Variable";
+  font-family: "Montserrat";
   max-width: 96vw;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: 0.8s ease-in-out;
+  transition: 0.6s ease-in-out;
+  div {
+    font-family: "NanumSquareNeo-Variable";
+    font-size: 1.2rem;
+    padding: 1rem 0;
+    text-transform: uppercase;
+  }
   &:hover {
     line-height: 1.6rem;
     color: ${(props) => props.theme.ListColor};
@@ -94,6 +135,7 @@ const Description = styled.p`
     white-space: normal;
     opacity: 1;
     overflow-x: hidden;
+    height: fit-content;
   }
 `;
 interface RouteState {
@@ -162,6 +204,8 @@ const Coin = () => {
   const { state } = useLocation<RouteState>();
   const [info, setInfo] = useState<IInfoData>();
   const [priceInfo, setPriceInfo] = useState<IPriceData>();
+  const priceMatch = useRouteMatch("/:coinId/price");
+  const chartMatch = useRouteMatch("/:coinId/chart");
   useEffect(() => {
     (async () => {
       const infoData = await (
@@ -175,7 +219,6 @@ const Coin = () => {
       setLoading(false);
     })();
   }, [coinId]);
-  console.log(info);
   /* 
   useEffect(
       //실행될 함수(useEffect 첫번째 매개 함수) 
@@ -213,7 +256,9 @@ const Coin = () => {
           <Title>로딩중...</Title>
         ) : (
           <Title>
-            {state?.name ? state.name : loading ? "로딩중..." : info?.name}
+            <Link to={`/`}>
+              {state?.name ? state.name : loading ? "로딩중..." : info?.name}
+            </Link>
           </Title>
           //state는 useLocation()을 이용한
           //user Location의 정보를 담은 객체.
@@ -271,12 +316,15 @@ const Coin = () => {
               <span>{priceInfo?.max_supply}</span>
             </OverviewItem>
           </Overview>
-          <Overview>
-            <OverviewItem>
-              <span>Price:</span>
-              <span>{priceInfo?.quotes.USD.price.toFixed(4)} USD</span>
-            </OverviewItem>
-          </Overview>
+
+          <Tabs>
+            <Tab isActive={chartMatch !== null}>
+              <Link to={`/${coinId}/chart`}>Chart</Link>
+            </Tab>
+            <Tab isActive={priceMatch !== null}>
+              <Link to={`/${coinId}/price`}>Price</Link>
+            </Tab>
+          </Tabs>
           <Switch>
             <Route path={`/${coinId}/price`}>
               <Price />
@@ -285,7 +333,10 @@ const Coin = () => {
               <Chart />
             </Route>
           </Switch>
-          <Description>{info?.description}</Description>
+          <Description>
+            <div>{`ABOUT - ${coinId} `}</div>
+            {info?.description}
+          </Description>
         </Article>
       )}
     </Container>
