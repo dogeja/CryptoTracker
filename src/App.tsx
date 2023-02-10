@@ -1,6 +1,8 @@
 import Router from "./Router";
-import { createGlobalStyle } from "styled-components";
-
+import { createGlobalStyle, ThemeProvider } from "styled-components";
+import { ReactQueryDevtools } from "react-query/devtools";
+import { darkTheme, lightTheme } from "./theme";
+import { useState } from "react";
 const GrobalStyle = createGlobalStyle`
 
 @font-face {
@@ -9,6 +11,7 @@ const GrobalStyle = createGlobalStyle`
     font-weight: normal;
     font-style: normal;
 }
+
  html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -70,10 +73,14 @@ a{
 `;
 
 function App() {
+  const [isDark, setIsDark] = useState(false);
+  const toggleDark = () => setIsDark((current) => !current);
   return (
     <>
-      <GrobalStyle></GrobalStyle>
-      <Router></Router>
+      <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
+        <GrobalStyle></GrobalStyle>
+        <Router isDark={isDark} toggleDark={toggleDark}></Router>
+      </ThemeProvider>
     </>
   );
 }

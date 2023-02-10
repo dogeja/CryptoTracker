@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { fetchCoins } from "../api";
 import { useQuery } from "react-query";
+import { Helmet } from "react-helmet";
 const Title = styled.h1`
   color: ${(props) => props.theme.accentColor};
   font-size: 1.8rem;
@@ -66,6 +67,21 @@ const Coin = styled.li`
     box-shadow: 0 3px 3px ${(props) => props.theme.bgColor};
   }
 `;
+const ThemeChanger = styled.div`
+  width: 48px;
+  height: 48px;
+  margin-left: 1.2rem;
+  color: ${(props) => props.theme.textColor};
+  background-color: ${(props) => props.theme.ListColor};
+  border-radius: 12px;
+  align-items: center;
+  text-align: center;
+  line-height: 24px;
+  font-weight: 900;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: "NanumSquareNeo-Variable";
+`;
 
 const Img = styled.img`
   width: 25px;
@@ -82,18 +98,28 @@ interface ICoin {
   is_active: boolean;
   type: string;
 }
-
-const Coins = () => {
+interface ICoinsProps {
+  toggleDark: () => void;
+  isDark: boolean;
+}
+const Coins = ({ toggleDark, isDark }: ICoinsProps) => {
   const { isLoading, data } = useQuery<ICoin[]>("allCoins", fetchCoins);
   return (
     <Container>
+      <Helmet>
+        <title>!비트코인!</title>
+      </Helmet>
       <Header>
         <Img src="https://media1.giphy.com/media/SixRnKkqPYhRgSJ4Vj/giphy.gif?cid=6c09b952bpwm1m4w6idkb3gry3pr3sww8svfsky6x9xg1nor&rid=giphy.gif&ct=s"></Img>
         {isLoading ? <Title>로딩중...</Title> : <Title>!비트코인!</Title>}
-        <Img src="https://media1.giphy.com/media/SixRnKkqPYhRgSJ4Vj/giphy.gif?cid=6c09b952bpwm1m4w6idkb3gry3pr3sww8svfsky6x9xg1nor&rid=giphy.gif&ct=s"></Img>
+        <ThemeChanger onClick={toggleDark}>
+          {isDark ? "!밝은!" : "!다크!"}
+          <br />
+          !모드!
+        </ThemeChanger>
       </Header>
       <CoinsList>
-        {data?.map((coin) => (
+        {data?.slice(0, 100).map((coin) => (
           <Coin key={coin.id}>
             <Link
               to={{

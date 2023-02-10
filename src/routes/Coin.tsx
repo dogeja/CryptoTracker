@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Switch,
   Route,
@@ -10,6 +9,9 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import Price from "./Price";
 import Chart from "./Chart";
+import { Helmet } from "react-helmet";
+import { useQuery } from "react-query";
+import { fetchCoinInfo, fetchCoinTickers } from "../api";
 interface RouteParams {
   coinId: string;
 }
@@ -124,24 +126,13 @@ const Description = styled.div`
   height: 400px;
   font-family: "Montserrat";
   max-width: 96vw;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.3rem;
   transition: 0.6s ease-in-out;
   div {
     font-family: "NanumSquareNeo-Variable";
     font-size: 1.2rem;
     padding: 1rem 0;
     text-transform: uppercase;
-  }
-  &:hover {
-    line-height: 1.6rem;
-    color: ${(props) => props.theme.ListColor};
-    max-width: 96vw;
-    white-space: normal;
-    opacity: 1;
-    overflow-x: hidden;
-    height: fit-content;
   }
 `;
 interface RouteState {
@@ -203,52 +194,32 @@ interface IPriceData {
     };
   };
 }
+interface ICoinProps {
+  isDark: boolean;
+}
 
-const Coin = () => {
-  const [loading, setLoading] = useState(true);
+const Coin = ({ isDark }: ICoinProps) => {
   const { coinId } = useParams<RouteParams>();
   const { state } = useLocation<RouteState>();
-  const [info, setInfo] = useState<IInfoData>();
-  const [priceInfo, setPriceInfo] = useState<IPriceData>();
   const priceMatch = useRouteMatch("/:coinId/price");
   const chartMatch = useRouteMatch("/:coinId/chart");
-  useEffect(() => {
-    (async () => {
-      const infoData = await (
-        await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
-      ).json();
-      const priceData = await (
-        await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
-      ).json();
-      setInfo(infoData);
-      setPriceInfo(priceData);
-      setLoading(false);
-    })();
-  }, [coinId]);
-  /* 
-  useEffect(
-      //실행될 함수(useEffect 첫번째 매개 함수) 
-    ()=>{
-       //익명 함수
-      (async()=>{
-          //fetch함수(api콜)
-          const response = await fetch("url");
-          const json = await response.json();
-          }
-          //fetch함수 종료 (api콜)
-      )
-      // 익명 함수 종료
-      ();
-      // 즉시 실행용 괄호
-    })
-    // 실행될 함수 종료(useEffect 첫번째 매개 함수) 
-    ,[]
-    //state변화 감지용     
-    );
-  
-  */
+  const { isLoading: infoLoading, data: infoData } = useQuery<IInfoData>(
+    ["info", coinId],
+    () => fetchCoinInfo(coinId)
+  );
+  const { isLoading: tickersLoading, data: tickersData } = useQuery<IPriceData>(
+    ["tickers", coinId],
+    () => fetchCoinTickers(coinId)
+  );
+  const loading = infoLoading || tickersLoading;
+
   return (
     <Container>
+      <Helmet>
+        <title>
+          {state?.name ? state.name : loading ? "로딩중..." : infoData?.name}
+        </title>
+      </Helmet>
       <Header>
         <PrevBtn>
           <Link to={`/`}>&larr;</Link>
@@ -257,7 +228,7 @@ const Coin = () => {
           <Img2 src="https://media1.giphy.com/media/SixRnKkqPYhRgSJ4Vj/giphy.gif?cid=6c09b952bpwm1m4w6idkb3gry3pr3sww8svfsky6x9xg1nor&rid=giphy.gif&ct=s"></Img2>
         ) : (
           <Img
-            src={` https://coinicons-api.vercel.app/api/icon/${info?.symbol.toLowerCase()}`}
+            src={` https://coinicons-api.vercel.app/api/icon/${infoData?.symbol.toLowerCase()}`}
           ></Img>
         )}
 
@@ -266,7 +237,11 @@ const Coin = () => {
         ) : (
           <>
             <Title>
-              {state?.name ? state.name : loading ? "로딩중..." : info?.name}
+              {state?.name
+                ? state.name
+                : loading
+                ? "로딩중..."
+                : infoData?.name}
             </Title>
           </>
           //state는 useLocation()을 이용한
@@ -282,15 +257,15 @@ const Coin = () => {
               false:
                 loading중인가요?
                   true : "로딩중.."
-                  false : info?.name 
-                    =>info객체의 name이 존재하면 출력  
+                  false : infoData?.name 
+                    =>infoData객체의 name이 존재하면 출력  
           */
         )}
         {loading ? (
           <Img2 src="https://media1.giphy.com/media/SixRnKkqPYhRgSJ4Vj/giphy.gif?cid=6c09b952bpwm1m4w6idkb3gry3pr3sww8svfsky6x9xg1nor&rid=giphy.gif&ct=s"></Img2>
         ) : (
           <Img
-            src={` https://coinicons-api.vercel.app/api/icon/${info?.symbol.toLowerCase()}`}
+            src={` https://coinicons-api.vercel.app/api/icon/${infoData?.symbol.toLowerCase()}`}
           ></Img>
         )}
       </Header>
@@ -304,25 +279,25 @@ const Coin = () => {
           <Overview>
             <OverviewItem>
               <span>Rank:</span>
-              <span>{info?.rank}</span>
+              <span>{infoData?.rank}</span>
             </OverviewItem>
             <OverviewItem>
               <span>Symbol:</span>
-              <span>{info?.symbol}</span>
+              <span>{infoData?.symbol}</span>
             </OverviewItem>
             <OverviewItem>
               <span>Open Source:</span>
-              <span>{info?.open_source ? "Yes" : "No"}</span>
+              <span>{infoData?.open_source ? "Yes" : "No"}</span>
             </OverviewItem>
           </Overview>
           <Overview>
             <OverviewItem>
               <span>Total Suply:</span>
-              <span>{priceInfo?.total_supply}</span>
+              <span>{tickersData?.total_supply}</span>
             </OverviewItem>
             <OverviewItem>
               <span>Max Supply:</span>
-              <span>{priceInfo?.max_supply}</span>
+              <span>{tickersData?.max_supply}</span>
             </OverviewItem>
           </Overview>
 
@@ -335,16 +310,16 @@ const Coin = () => {
             </Tab>
           </Tabs>
           <Switch>
-            <Route path={`/${coinId}/price`}>
-              <Price />
-            </Route>
             <Route path={`/${coinId}/chart`}>
-              <Chart />
+              <Chart isDark={isDark} coinId={coinId} />
+            </Route>
+            <Route path={`/${coinId}/price`}>
+              <Price coinId={coinId} />
             </Route>
           </Switch>
           <Description>
             <div>{`ABOUT - ${coinId} `}</div>
-            {info?.description}
+            {infoData?.description}
           </Description>
         </Article>
       )}

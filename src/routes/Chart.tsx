@@ -1,5 +1,93 @@
-const Chart = () => {
-  return <div>Chart!</div>;
+// @ts-nocheck
+
+import { useQuery } from "react-query";
+import { fetchChart } from "../api";
+import ApexCharts from "react-apexcharts";
+interface ChartProps {
+  coinId: string;
+  isDark: boolean;
+}
+interface IData {
+  close: string;
+  high: string;
+  low: string;
+  market_cap: number;
+  open: string;
+  time_close: number;
+  time_open: number;
+  volume: string;
+}
+const Chart = ({ coinId, isDark }: ChartProps) => {
+  const { isLoading, data } = useQuery<IData[]>(
+    ["Chart", coinId],
+    () => fetchChart(coinId),
+    {
+      refetchInterval: 10000,
+    }
+  );
+  return (
+    <>
+      {isLoading ? (
+        "로딩중"
+      ) : (
+        <ApexCharts
+          type="candlestick"
+          series={[
+            {
+              data: data?.map((price) => {
+                return [
+                  price.time_close,
+                  [price.open, price.high, price.low, price.close],
+                ];
+              }),
+            },
+          ]}
+          options={{
+            plotOptions: {
+              candlestick: {
+                colors: {
+                  upward: "#15e264",
+                  downward: "#e61102",
+                },
+              },
+            },
+            theme: {
+              mode: isDark ? "dark" : "light",
+            },
+            chart: {
+              type: "candlestick",
+              height: 350,
+              width: 500,
+              toolbar: {
+                show: false,
+              },
+              background: "transparent",
+            },
+            grid: {
+              show: true,
+            },
+            title: {
+              text: "차트",
+              align: "left",
+            },
+            xaxis: {
+              type: "datetime",
+              labels: { show: false },
+              axisBorder: { show: false },
+              axisTicks: { show: false },
+            },
+            yaxis: {
+              show: false,
+            },
+            stroke: {
+              curve: "smooth",
+              width: 2,
+            },
+          }}
+        />
+      )}
+    </>
+  );
 };
 export default Chart;
 // 아이디의 Chart값으로 Link이용,
