@@ -3,10 +3,8 @@
 import { useQuery } from "react-query";
 import { fetchChart } from "../api";
 import ApexCharts from "react-apexcharts";
-interface ChartProps {
-  coinId: string;
-  isDark: boolean;
-}
+import { isDarkAtom } from "../atoms";
+import { useRecoilValue } from "recoil";
 interface IData {
   close: string;
   high: string;
@@ -17,7 +15,8 @@ interface IData {
   time_open: number;
   volume: string;
 }
-const Chart = ({ coinId, isDark }: ChartProps) => {
+const Chart = ({ coinId }) => {
+  const isDark = useRecoilValue(isDarkAtom);
   const { isLoading, data } = useQuery<IData[]>(
     ["Chart", coinId],
     () => fetchChart(coinId),
@@ -72,9 +71,9 @@ const Chart = ({ coinId, isDark }: ChartProps) => {
             },
             xaxis: {
               type: "datetime",
-              labels: { show: false },
-              axisBorder: { show: false },
-              axisTicks: { show: false },
+              labels: { show: true },
+              axisBorder: { show: true },
+              axisTicks: { show: true },
             },
             yaxis: {
               show: false,

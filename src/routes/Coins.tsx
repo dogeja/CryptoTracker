@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { fetchCoins } from "../api";
 import { useQuery } from "react-query";
 import { Helmet } from "react-helmet";
+import { isDarkAtom } from "../atoms";
+import { useRecoilValue } from "recoil";
+import { useSetRecoilState } from "recoil";
 const Title = styled.h1`
   color: ${(props) => props.theme.accentColor};
   font-size: 1.8rem;
@@ -98,11 +101,11 @@ interface ICoin {
   is_active: boolean;
   type: string;
 }
-interface ICoinsProps {
-  toggleDark: () => void;
-  isDark: boolean;
-}
-const Coins = ({ toggleDark, isDark }: ICoinsProps) => {
+
+const Coins = () => {
+  const isDark = useRecoilValue(isDarkAtom);
+  const setDarkAtom = useSetRecoilState(isDarkAtom);
+  const toggleDarkAtom = () => setDarkAtom((prev) => !prev);
   const { isLoading, data } = useQuery<ICoin[]>("allCoins", fetchCoins);
   return (
     <Container>
@@ -112,7 +115,7 @@ const Coins = ({ toggleDark, isDark }: ICoinsProps) => {
       <Header>
         <Img src="https://media1.giphy.com/media/SixRnKkqPYhRgSJ4Vj/giphy.gif?cid=6c09b952bpwm1m4w6idkb3gry3pr3sww8svfsky6x9xg1nor&rid=giphy.gif&ct=s"></Img>
         {isLoading ? <Title>로딩중...</Title> : <Title>!비트코인!</Title>}
-        <ThemeChanger onClick={toggleDark}>
+        <ThemeChanger onClick={toggleDarkAtom}>
           {isDark ? "!밝은!" : "!다크!"}
           <br />
           !모드!
