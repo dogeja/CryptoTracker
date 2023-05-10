@@ -21,7 +21,7 @@ const Chart = ({ coinId }) => {
     ["Chart", coinId],
     () => fetchChart(coinId),
     {
-      refetchInterval: 10000,
+      refetchInterval: 8000,
     }
   );
   return (
